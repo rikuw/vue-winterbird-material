@@ -1,4 +1,4 @@
-# Quasar App
+# Winter Bird Count
 
 > VueJS single page application for viewing winter bird counts in Finland. Made with Quasar framework.
 
