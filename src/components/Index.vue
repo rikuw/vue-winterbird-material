@@ -1,85 +1,211 @@
 <template>
-    <q-layout>
 
-    <!--
-      Replace following "div" with
-      "<router-view class="layout-view">" component
-      if using subRoutes
-  -->
-        <div class="layout-view">
-            <div class="layout-padding">
-                <div class="card">
-                    <div class="card-title">
-                        Hae laskentoja
+    <div>
+        <q-layout>
+
+            <div class="layout-view">
+                <div class="layout-padding">
+                    <div class="card">
+                        <div class="card-title">
+                            Hae laskentoja
+                        </div>
+                        <div class="card-content">
+                            <q-select
+                              type="radio"
+                              v-model="selectedYear"
+                              :options="yearsOptions" placeholder="Valitse vuosi"></q-select>
+                            <q-select
+                              type="radio"
+                              v-model="selectedCount"
+                              :options="countOptions" placeholder="Valitse laskentakausi"></q-select>
+                        </div>
+                        <div class="card-actions">
+                            <button class="primary" @click="loadCounts">Hae</button>
+                        </div>
                     </div>
-                    <div class="card-content">
-                        <q-select
-                          type="radio"
-                          v-model="selectedYear"
-                          :options="yearsOptions" placeholder="Valitse vuosi"></q-select>
-                        <q-select
-                          type="radio"
-                          v-model="selectedCount"
-                          :options="countOptions" placeholder="Valitse laskentakausi"></q-select>
-                    </div>
-                    <div class="card-actions">
-                        <button class="primary" @click="loadCounts">Hae</button>
-                    </div>
+
+                    <q-data-table
+                      :data="counts"
+                      :config="config"
+                      :columns="columns"
+                      @refresh="refresh"
+                    >
+                        <template slot="col-documentID" scope="cell">
+                            <a @click="loadCount(cell.data)">{{ cell.data }}</a>
+                        </template>
+                    </q-data-table>
                 </div>
             </div>
-        </div>
-    </q-layout>
+        </q-layout>
+
+        <Count></Count>
+    </div>
+
 </template>
 
 <script>
-    import Quasar, { Utils, Dialog } from 'quasar'
+    import Quasar, { Platform, Utils, Dialog, Loading, Toast } from 'quasar'
+    import Count from './Count.vue'
 
     export default {
-      data () {
-        return {
-            selectedYear: '',
-            selectedCount: '',
-            yearsOptions: [
+        components: {
+          'Count': Count
+        },
+        data () {
+            return {
+                selectedYear: '',
+                selectedCount: '',
+                yearsOptions: [
+                    {
+                        label: '2014',
+                        value: '2014'
+                    },
+                    {
+                        label: '2015',
+                        value: '2015'
+                    },
+                    {
+                        label: '2016',
+                        value: '2016'
+                    },
+                    {
+                        label: '2017',
+                        value: '2017'
+                    }
+                ],
+                countOptions: [
+                    {
+                        label: '1',
+                        value: 1
+                    },
+                    {
+                        label: '2',
+                        value: 2
+                    },
+                    {
+                        label: '3',
+                        value: 3
+                    }
+                ],
+                counts: [{
+                    "documentID": "N/A",
+                    "date": 10000000,
+                    "team": "N/A",
+                    "route": 0,
+                    "areaID": 0,
+                    "areaName": "N/A",
+                    "speciesCount": 0,
+                    "individualCount": 0,
+                    "municipality": "N/A"
+                }],
+                config: {
+                    title: 'Laskennat',
+                    filter: true,
+                    refresh: true,
+                    columnPicker: true,
+                    leftStickyColumns: 1,
+                    rightStickyColumns: 2,
+                    bodyStyle: {
+                    maxHeight: Platform.is.mobile ? '50vh' : '500px'
+                },
+                rowHeight: '50px',
+                responsive: true,
+                pagination: {
+                    rowsPerPage: 15,
+                    options: [5, 10, 15, 30, 50, 500]
+                },
+                selection: false,
+                messages: {
+                    noData: '<i>warning</i> Ei laskentoja näytettäväksi.',
+                    noDataAfterFiltering: '<i>warning</i> Ei tuloksia. Muuta hakuasetuksiasi.'
+                }
+            },
+            columns: [
                 {
-                    label: '2014',
-                    value: '2014'
+                    label: 'ID',
+                    field: 'documentID',
+                    width: '80px'
                 },
                 {
-                    label: '2015',
-                    value: '2015'
+                    label: 'Pvm',
+                    field: 'date',
+                    format (value) {
+                        if (value !== 10000000) {
+                            let a = '' + value;
+                            let b = a.slice(0, 4);
+                            let c = a.slice(4, 6);
+                            let d = a.slice(6, 8);
+
+                            return new Date(b + '-' + c + '-' + d).toLocaleString();
+                        } else {
+                            return 'N/A';
+                        }
+                    },
+                    width: '120px'
                 },
                 {
-                    label: '2016',
-                    value: '2016'
+                    label: 'Kunta',
+                    field: 'municipality',
+                    sort: true,
+                    width: '500px'
                 },
                 {
-                    label: '2017',
-                    value: '2017'
+                    label: 'Reittinumero',
+                    field: 'route',
+                    sort: true,
+                    width: '120px'
+                },
+                {
+                    label: 'Lajimäärä',
+                    field: 'speciesCount',
+                    sort: true,
+                    width: '120px'
+                },
+                {
+                    label: 'Yksilömäärä',
+                    field: 'individualCount',
+                    sort: true,
+                    width: '120px'
                 }
             ],
-            countOptions: [
-                {
-                    label: '1',
-                    value: 1
-                },
-                {
-                    label: '2',
-                    value: 2
-                },
-                {
-                    label: '3',
-                    value: 3
-                }
-            ]
+            pagination: true,
+            rowHeight: 50,
+            bodyHeightProp: 'maxHeight',
+            bodyHeight: 500
         }
     },
     computed: {
 
     },
     methods: {
-        loadCounts () {
+        loadCounts() {
             if (this.selectedYear !== '' && this.selectedCount !== '') {
-                this.$router.push('/show-counts/' + this.selectedYear + '/' + this.selectedCount);
+                Loading.show({
+                    message: 'Haetaan laskentoja...',
+                    messageColor: '#ffffff',
+                    spinnerSize: 250
+                });
+
+                this.$http.get('http://localhost/selain/list.php?year=' + this.selectedYear + '&count=' + this.selectedCount).then((response) => {
+                    if (response.body.length !== 0) {
+                        this.counts = response.body;
+                        Loading.hide();
+                    } else {
+                        Loading.hide();
+                        Toast.create.warning({
+                            html: 'Laskentoja ei ei löytynyt parametreilla.',
+                            icon: 'error_outline',
+                            timeout: 20000
+                        });
+                    }            
+                }, (response) => {
+                    Loading.hide();
+                    Toast.create.warning({
+                        html: 'Laskentoja ei pystytty hakemaan.',
+                        icon: 'error_outline',
+                        timeout: 20000
+                    });
+                });
             } else {
                 Dialog.create({
                     title: 'Virhe',
@@ -89,6 +215,12 @@
                     ]
                 })
             }            
+        },
+        loadCount (id) {
+            this.$root.$emit('openCount', id);
+        },
+        refresh() {
+
         }
     },
     mounted () {
@@ -103,5 +235,14 @@
 <style>
     .q-picker-textfield + .q-picker-textfield {
         margin-left: 10px;
+    }
+
+    .modal-content {
+      width: 100vw;
+      max-width: 90vw !important;
+    }
+
+    .q-table {
+      width: 100%;
     }
 </style>

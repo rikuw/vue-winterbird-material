@@ -1,12 +1,6 @@
 <template>
   <div>
     <q-layout>
-
-    <!--
-      Replace following "div" with
-      "<router-view class="layout-view">" component
-      if using subRoutes
-  -->
         <div class="layout-view">
             <div class="layout-padding">
                 <q-data-table
@@ -18,29 +12,18 @@
                     <template slot="col-documentID" scope="cell">
                         <a @click="loadCount(cell.data)">{{ cell.data }}</a>
                     </template>
-                    <!-- Custom renderer when user selected one or more rows -->
-                    <template slot="selection" scope="selection">
-                        <button class="primary clear" @click="changeMessage(selection)">
-                            <i>edit</i>
-                        </button>
-                        <button class="primary clear" @click="deleteRow(selection)">
-                            <i>delete</i>
-                        </button>
-                    </template>
                 </q-data-table>
             </div>
         </div>
     </q-layout>
-
     <Count></Count>
 
   </div>
 </template>
 
 <script>
-    import { Utils, Loading, Toast } from 'quasar'
+    import { Platform, Utils, Loading, Toast } from 'quasar'
     import Count from './Count.vue'
-    //import table from './../assets/test.json';
 
     export default {
       components: {
@@ -67,7 +50,7 @@
                 leftStickyColumns: 1,
                 rightStickyColumns: 2,
                 bodyStyle: {
-                  maxHeight: '500px'
+                  maxHeight: Platform.is.mobile ? '50vh' : '500px'
                 },
                 rowHeight: '50px',
                 responsive: true,
@@ -75,7 +58,7 @@
                   rowsPerPage: 15,
                   options: [5, 10, 15, 30, 50, 500]
                 },
-                selection: 'multiple',
+                selection: false,
                 messages: {
                   noData: '<i>warning</i> Ei laskentoja näytettäväksi.',
                   noDataAfterFiltering: '<i>warning</i> Ei tuloksia. Muuta hakuasetuksiasi.'
@@ -105,6 +88,12 @@
                   field: 'municipality',
                   sort: true,
                   width: '500px'
+                },
+                {
+                    label: 'Reittinumero',
+                    field: 'route',
+                    sort: true,
+                    width: '120px'
                 },
                 {
                   label: 'Lajimäärä',

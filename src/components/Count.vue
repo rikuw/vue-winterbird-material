@@ -44,62 +44,6 @@
                     <td data-th="Yksilömäärä">{{ unit.count }}</td>
                     <td data-th="YksilömääräSukupuolet">{{ unit.countGender }}</td>
                   </tr>
-                  <!--<tr>
-                    <td data-th="Laji (suom.)">Tukkasotka</td>
-                    <td data-th="Laji">Aythya fuligula</td>
-                    <td data-th="YksilömääräBiotooppiF">21</td>
-                    <td data-th="Yksilömäärä">21</td>
-                    <td data-th="YksilömääräSukupuolet">3/1</td>
-                  </tr>
-                  <tr>
-                    <td data-th="Laji (suom.)">Tukkasotka</td>
-                    <td data-th="Laji">Aythya fuligula</td>
-                    <td data-th="YksilömääräBiotooppiF">21</td>
-                    <td data-th="Yksilömäärä">21</td>
-                    <td data-th="YksilömääräSukupuolet">3/1</td>
-                  </tr>
-                  <tr>
-                    <td data-th="Laji (suom.)">Tukkasotka</td>
-                    <td data-th="Laji">Aythya fuligula</td>
-                    <td data-th="YksilömääräBiotooppiF">21</td>
-                    <td data-th="Yksilömäärä">21</td>
-                    <td data-th="YksilömääräSukupuolet">3/1</td>
-                  </tr>
-                  <tr>
-                    <td data-th="Laji (suom.)">Tukkasotka</td>
-                    <td data-th="Laji">Aythya fuligula</td>
-                    <td data-th="YksilömääräBiotooppiF">21</td>
-                    <td data-th="Yksilömäärä">21</td>
-                    <td data-th="YksilömääräSukupuolet">3/1</td>
-                  </tr>
-                  <tr>
-                    <td data-th="Laji (suom.)">Tukkasotka</td>
-                    <td data-th="Laji">Aythya fuligula</td>
-                    <td data-th="YksilömääräBiotooppiF">21</td>
-                    <td data-th="Yksilömäärä">21</td>
-                    <td data-th="YksilömääräSukupuolet">3/1</td>
-                  </tr>
-                  <tr>
-                    <td data-th="Laji (suom.)">Tukkasotka</td>
-                    <td data-th="Laji">Aythya fuligula</td>
-                    <td data-th="YksilömääräBiotooppiF">21</td>
-                    <td data-th="Yksilömäärä">21</td>
-                    <td data-th="YksilömääräSukupuolet">3/1</td>
-                  </tr>
-                  <tr>
-                    <td data-th="Laji (suom.)">Tukkasotka</td>
-                    <td data-th="Laji">Aythya fuligula</td>
-                    <td data-th="YksilömääräBiotooppiF">21</td>
-                    <td data-th="Yksilömäärä">21</td>
-                    <td data-th="YksilömääräSukupuolet">3/1</td>
-                  </tr>
-                  <tr>
-                    <td data-th="Laji (suom.)">Tukkasotka</td>
-                    <td data-th="Laji">Aythya fuligula</td>
-                    <td data-th="YksilömääräBiotooppiF">21</td>
-                    <td data-th="Yksilömäärä">21</td>
-                    <td data-th="YksilömääräSukupuolet">3/1</td>
-                  </tr>-->
                 </tbody>
               </table>
           </div>
@@ -108,7 +52,7 @@
 </template>
 
 <script>
-    import { Utils, Toast } from 'quasar';
+    import { Utils, Toast, Loading } from 'quasar';
     import birdNames from './../assets/latin-fin.json';
 
     export default {
@@ -184,15 +128,22 @@
             }
 
             this.totalCount = totalCount;
-        }
-    },
-    mounted () {
-        this.$root.$on('openCount', (id) => {
+        },
+
+        getCountData(id) {
+            Loading.show({
+                message: 'Haetaan laskennan tietoja...',
+                messageColor: '#ffffff',
+                spinnerSize: 250
+            });
+
             this.$http.get('http://localhost/selain/census.php?id=' + id).then((response) => {
                 let parser = new DOMParser();
                 this.xml = parser.parseFromString(response.body, 'text/xml');
                 this.parseXML();
+                Loading.hide();
             }, (response) => {
+                Loading.hide();
                 Toast.create.warning({
                     html: 'Laskennan tietoja ei pystytty hakemaan.',
                     icon: 'error_outline',
@@ -201,6 +152,11 @@
             });
 
             this.$refs['countModal'].open();
+        }
+    },
+    mounted () {
+        this.$root.$on('openCount', (id) => {
+            this.getCountData(id);
         });
     },
     beforeDestroy () {
