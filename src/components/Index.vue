@@ -173,7 +173,7 @@
                     this.isLoading = true;
                     this.$refs.bar.start();
 
-                    this.$http.get('http://localhost/selain/list.php?year=' + this.selectedYear + '&count=' + this.selectedCount).then((response) => {
+                    this.$http.get('./list.php?year=' + this.selectedYear + '&count=' + this.selectedCount).then((response) => {
                         if (response.body.length !== 0) {
                             this.counts = response.body;
                             this.$refs.bar.stop();

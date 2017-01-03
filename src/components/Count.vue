@@ -137,7 +137,7 @@
                 spinnerSize: 250
             });
 
-            this.$http.get('http://localhost/selain/census.php?id=' + id).then((response) => {
+            this.$http.get('./census.php?id=' + id).then((response) => {
                 let parser = new DOMParser();
                 this.xml = parser.parseFromString(response.body, 'text/xml');
                 this.parseXML();
