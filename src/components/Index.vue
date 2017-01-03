@@ -56,36 +56,15 @@
                 selectedYear: '',
                 selectedCount: '',
                 yearsOptions: [
-                    {
-                        label: '2014',
-                        value: '2014'
-                    },
-                    {
-                        label: '2015',
-                        value: '2015'
-                    },
-                    {
-                        label: '2016',
-                        value: '2016'
-                    },
-                    {
-                        label: '2017',
-                        value: '2017'
-                    }
+                    { label: '2014', value: '2014' },
+                    { label: '2015', value: '2015' },
+                    { label: '2016', value: '2016' },
+                    { label: '2017', value: '2017' }
                 ],
                 countOptions: [
-                    {
-                        label: '1',
-                        value: 1
-                    },
-                    {
-                        label: '2',
-                        value: 2
-                    },
-                    {
-                        label: '3',
-                        value: 3
-                    }
+                    { label: '1', value: 1 },
+                    { label: '2', value: 2 },
+                    { label: '3', value: 3 }
                 ],
                 counts: [{
                     "documentID": "N/A",
@@ -147,12 +126,14 @@
                     label: 'Kunta',
                     field: 'municipality',
                     sort: true,
+                    filter: true,
                     width: '500px'
                 },
                 {
                     label: 'Reittinumero',
                     field: 'route',
                     sort: true,
+                    filter: true,
                     width: '120px'
                 },
                 {
@@ -174,57 +155,67 @@
             bodyHeight: 500
         }
     },
-    computed: {
-
-    },
     methods: {
         loadCounts() {
-            if (this.selectedYear !== '' && this.selectedCount !== '') {
-                Loading.show({
-                    message: 'Haetaan laskentoja...',
-                    messageColor: '#ffffff',
-                    spinnerSize: 250
-                });
+            return new Promise((resolve, reject) => {
+                if (this.selectedYear !== '' && this.selectedCount !== '') {
+                    Loading.show({
+                        message: 'Haetaan laskentoja...',
+                        messageColor: '#ffffff',
+                        spinnerSize: 250
+                    });
 
-                this.$http.get('http://localhost/selain/list.php?year=' + this.selectedYear + '&count=' + this.selectedCount).then((response) => {
-                    if (response.body.length !== 0) {
-                        this.counts = response.body;
-                        Loading.hide();
-                    } else {
+                    this.$http.get('http://localhost/selain/list.php?year=' + this.selectedYear + '&count=' + this.selectedCount).then((response) => {
+                        if (response.body.length !== 0) {
+                            this.counts = response.body;
+                            Loading.hide();
+                            resolve();
+                        } else {
+                            Loading.hide();
+                            Toast.create.warning({
+                                html: 'Laskentoja ei ei löytynyt parametreilla.',
+                                icon: 'error_outline',
+                                timeout: 20000
+                            });
+
+                            reject();
+                        }
+                    }, (response) => {
                         Loading.hide();
                         Toast.create.warning({
-                            html: 'Laskentoja ei ei löytynyt parametreilla.',
+                            html: 'Laskentoja ei pystytty hakemaan.',
                             icon: 'error_outline',
                             timeout: 20000
                         });
-                    }            
-                }, (response) => {
-                    Loading.hide();
-                    Toast.create.warning({
-                        html: 'Laskentoja ei pystytty hakemaan.',
-                        icon: 'error_outline',
-                        timeout: 20000
+
+                        reject();
                     });
-                });
-            } else {
-                Dialog.create({
-                    title: 'Virhe',
-                    message: 'Selataksesi laskentoja sinun täytyy valita sekä laskentavuosi että laskentakausi.',
-                    buttons: [
-                        'Ok'
-                    ]
-                })
-            }            
+                } else {
+                    Dialog.create({
+                        title: 'Virhe',
+                        message: 'Selataksesi laskentoja sinun täytyy valita sekä laskentavuosi että laskentakausi.',
+                        buttons: [
+                            'Ok'
+                        ]
+                    });
+
+                    reject();
+                }
+            });
         },
         loadCount (id) {
             this.$root.$emit('openCount', id);
         },
-        refresh() {
-
+        refresh(done) {
+            this.loadCounts().then(() => {
+                done();
+            }, () => {
+                done();
+            });
         }
     },
     mounted () {
-
+        
     },
     beforeDestroy () {
 
@@ -240,6 +231,10 @@
     .modal-content {
       width: 100vw;
       max-width: 90vw !important;
+    }
+
+    .q-data-table {
+        margin-bottom: 20px;
     }
 
     .q-table {

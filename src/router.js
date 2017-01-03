@@ -22,7 +22,6 @@ export default new VueRouter({
 
   routes: [
     { path: '/', component: load('Index') }, // Default
-    { path: '/show-counts/:year/:count', component: load('CountsTable') }, // Laskennat
     { name: 'count', path: '/count/:id', component: load('Count') },
     { path: '*', component: load('Error404') } // Not found
   ]
