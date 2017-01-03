@@ -1,6 +1,7 @@
 <template>
 
     <div>
+        <q-ajax-bar ref="bar" :position="position" :reverse="reverse" :size="computedSize" :color="color"></q-ajax-bar>
         <q-layout>
 
             <div class="layout-view">
@@ -39,6 +40,7 @@
         </q-layout>
 
         <Count></Count>
+        
     </div>
 
 </template>
@@ -53,6 +55,10 @@
         },
         data () {
             return {
+                position: 'bottom',
+                reverse: false,
+                size: 8,
+                color: '#e21b0c',
                 selectedYear: '',
                 selectedCount: '',
                 yearsOptions: [
@@ -155,23 +161,27 @@
             bodyHeight: 500
         }
     },
+    computed: {
+        computedSize () {
+            return this.size + 'px'
+        }
+    },
     methods: {
         loadCounts() {
             return new Promise((resolve, reject) => {
                 if (this.selectedYear !== '' && this.selectedCount !== '') {
-                    Loading.show({
-                        message: 'Haetaan laskentoja...',
-                        messageColor: '#ffffff',
-                        spinnerSize: 250
-                    });
+                    this.isLoading = true;
+                    this.$refs.bar.start();
 
                     this.$http.get('http://localhost/selain/list.php?year=' + this.selectedYear + '&count=' + this.selectedCount).then((response) => {
                         if (response.body.length !== 0) {
                             this.counts = response.body;
-                            Loading.hide();
+                            this.$refs.bar.stop();
+                            this.isLoading = false;
                             resolve();
                         } else {
-                            Loading.hide();
+                            this.$refs.bar.stop();
+                            this.isLoading = false;
                             Toast.create.warning({
                                 html: 'Laskentoja ei ei löytynyt parametreilla.',
                                 icon: 'error_outline',
@@ -181,7 +191,8 @@
                             reject();
                         }
                     }, (response) => {
-                        Loading.hide();
+                        this.$refs.bar.stop();
+                        this.isLoading = false;
                         Toast.create.warning({
                             html: 'Laskentoja ei pystytty hakemaan.',
                             icon: 'error_outline',
@@ -215,7 +226,7 @@
         }
     },
     mounted () {
-        
+
     },
     beforeDestroy () {
 

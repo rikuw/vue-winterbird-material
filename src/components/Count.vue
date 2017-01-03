@@ -36,7 +36,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="unit in units">
-                    <td data-th="Laji (suom.)">{{ unit.name }}</td>
+                    <td data-th="Laji (suom.)"><span class="label text-white bg-primary">{{ unit.name }}</span></td>
                     <td data-th="Laji">{{ unit.latinName }}</td>
                     <td data-th="YksilömääräBiotooppi">
                         <span v-for="bio in unit.countBioF" style="display: block;">{{ bio.count }} ({{ bio.name }})</span>
