@@ -188,7 +188,7 @@
                                 timeout: 20000
                             });
 
-                            reject();
+                            resolve();
                         }
                     }, (response) => {
                         this.$refs.bar.stop();
@@ -199,7 +199,7 @@
                             timeout: 20000
                         });
 
-                        reject();
+                        resolve();
                     });
                 } else {
                     Dialog.create({
@@ -210,7 +210,7 @@
                         ]
                     });
 
-                    reject();
+                    resolve();
                 }
             });
         },
